@@ -52,7 +52,13 @@ class ParsimoniousLM:
 
 
     def top(self, k, d, n_iter=None):
-        '''Get the top k terms of a document d.'''
+        '''Get the top k terms of a document d.
+
+        Parameters
+        ----------
+        n_iter : int
+            Number of iterations to run. Defaults to 50.
+        '''
 
         tf, p_term = self.document_model(d)
         p_term = self.EM(tf, p_term, n_iter)
