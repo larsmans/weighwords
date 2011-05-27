@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 
-# Parsimonious language models
-#
-# As per D. Hiemstra, S. Robertson and H. Zaragoza (2004). Parsimonious
-# language models for information retrieval. SIGIR'04.
-#
-# Author: Lars Buitinck, ILPS, U. Amsterdam.
+# Copyright 2011 University of Amsterdam
+# Author: Lars Buitinck
 
 from collections import defaultdict
 from heapq import nlargest
@@ -16,7 +12,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-class ParsimoniousLM:
+class WeighWords(object):
     def __init__(self, documents, w):
         '''Build corpus (background) model.
 
