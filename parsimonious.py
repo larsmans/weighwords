@@ -8,6 +8,7 @@
 # Author: Lars Buitinck, ILPS, U. Amsterdam.
 
 from collections import defaultdict
+from heapq import nlargest
 import logging
 import numpy as np
 
@@ -16,12 +17,14 @@ logger = logging.getLogger(__name__)
 
 
 class ParsimoniousLM:
-    def __init__(self, documents):
+    def __init__(self, documents, w):
         '''Build corpus (background) model.
 
         Parameters
         ----------
         documents : array of arrays of terms
+        w : float
+            Weight of document model (1 - weight of corpus model)
 
         Returns
         -------
@@ -48,7 +51,16 @@ class ParsimoniousLM:
             p_corpus[i] = np.log(f) - c_size
 
 
-    def document_model(self, d, vocab):
+    def top(self, k, d, n_iter=None):
+        '''Get the top k terms of a document d.'''
+
+        tf, p_term = self.document_model(d)
+        p_term = self.EM(tf, p_term, n_iter)
+
+        return nlargest(k, self.vocab.iterkeys(), lambda t: p_term[t])
+
+
+    def _document_model(self, d):
         '''Build document model.
 
         Parameters
@@ -86,7 +98,7 @@ class ParsimoniousLM:
         return tf, p_term
 
 
-    def EM(self, tf, p_term, w, n_iter=50):
+    def _EM(self, tf, p_term, n_iter=None):
         '''Expectation maximization.
 
         Parameters
@@ -95,10 +107,8 @@ class ParsimoniousLM:
             Term frequencies, as returned by document_model
         p_term : array of float
             Term probabilities, as returned by document_model
-        w : float
-            Weight of document model (1 - weight of corpus model)
         n_iter : int
-            Number of iterations to run.
+            Number of iterations to run. Defaults to 50.
 
         Returns
         -------
@@ -107,6 +117,9 @@ class ParsimoniousLM:
         '''
 
         logger.info('EM')
+
+        if n_iter is None:
+            n_iter = 50
 
         w_ = np.log(1 - w)
         w = np.log(w)
