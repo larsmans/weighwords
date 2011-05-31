@@ -51,17 +51,19 @@ class WeighWords(object):
             self.p_corpus[i] = np.log(f) - c_size
 
 
-    def top(self, k, d, n_iter=None):
+    def top(self, k, d, n_iter=None, w=None):
         '''Get the top k terms of a document d.
 
         Parameters
         ----------
         n_iter : int
             Number of iterations to run. Defaults to 50.
+        w : float
+            Weight of document model; overrides value given to __init__
         '''
 
         tf, p_term = self._document_model(d)
-        p_term = self._EM(tf, p_term, n_iter)
+        p_term = self._EM(tf, p_term, w, n_iter)
 
         return nlargest(k, self.vocab.iteritems(),
                         lambda t: p_term[self.vocab[t]])
@@ -101,7 +103,7 @@ class WeighWords(object):
         return tf, p_term
 
 
-    def _EM(self, tf, p_term, n_iter=None):
+    def _EM(self, tf, p_term, w, n_iter=None):
         '''Expectation maximization.
 
         Parameters
@@ -124,8 +126,10 @@ class WeighWords(object):
         if n_iter is None:
             n_iter = 50
 
-        w_ = np.log(1 - self.w)
-        w = np.log(self.w)
+        if w is None:
+            w = self.w
+        w_ = np.log(1 - w)
+        w = np.log(w)
 
         p_corpus = self.p_corpus + w_
         tf = np.log(tf)
