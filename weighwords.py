@@ -65,7 +65,7 @@ class WeighWords(object):
         tf, p_term = self._document_model(d)
         p_term = self._EM(tf, p_term, w, n_iter)
 
-        return nlargest(k, self.vocab.iteritems(),
+        return nlargest(k, self.vocab.iterkeys(),
                         lambda t: p_term[self.vocab[t]])
 
 
