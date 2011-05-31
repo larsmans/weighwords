@@ -1,3 +1,7 @@
 *.pyc
 .*.swp
 .*.swo
+
+build/
+dist/
+weighwords.egg-info/
