@@ -36,12 +36,12 @@ class WeighWords(object):
 
         self.thresh = thresh
         self.w = w
-        self.vocab = {}         # Vocabulary: maps terms to numeric indices
+        self.vocab = vocab = {} # Vocabulary: maps terms to numeric indices
         cf = defaultdict(int)   # Corpus frequency
 
         for d in documents:
             for tok in d:
-                i = self.vocab.setdefault(tok, len(self.vocab))
+                i = vocab.setdefault(tok, len(vocab))
                 cf[i] += 1
 
         c_size = np.log(sum(cf.itervalues()))
@@ -63,7 +63,8 @@ class WeighWords(object):
         tf, p_term = self._document_model(d)
         p_term = self._EM(tf, p_term, n_iter)
 
-        return nlargest(k, self.vocab.iterkeys(), lambda t: p_term[t])
+        return nlargest(k, self.vocab.iteritems(),
+                        lambda t: p_term[self.vocab[t]])
 
 
     def _document_model(self, d):
@@ -72,7 +73,6 @@ class WeighWords(object):
         Parameters
         ----------
         d : array of terms
-        vocab : see @corpus_model
 
         Returns
         -------
