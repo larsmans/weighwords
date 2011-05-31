@@ -88,20 +88,15 @@ class WeighWords(object):
         logger.info('Gathering term probabilities')
 
         tf = np.zeros(len(self.vocab))   # Term frequency
-        p_term = np.empty(tf.shape[0])
-        p_term.fill(-np.inf)        # lg 0
 
         for tok in d:
-            i = self.vocab[tok]
-            if tf[i] == 0:
-                p_term[i] = 0.      # lg 1
-            tf[i] += 1.
+            tf[self.vocab[tok]] += 1
 
         rare = (tf < self.thresh)
         tf -= rare * tf
         n_distinct = (tf > 0).sum()
 
-        p_term -= np.log(n_distinct)
+        p_term = np.log(tf > 0) - np.log(n_distinct)
 
         return tf, p_term
 
