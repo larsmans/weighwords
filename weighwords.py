@@ -32,7 +32,8 @@ class WeighWords(object):
 
         logger.info('Building corpus model')
 
-        self.vocab = {}              # Vocabulary: maps terms to numeric indices
+        self.w = w
+	self.vocab = {}              # Vocabulary: maps terms to numeric indices
         cf = defaultdict(int)   # Corpus frequency
 
         for d in documents:
@@ -42,7 +43,7 @@ class WeighWords(object):
 
         c_size = np.log(sum(cf.itervalues()))
 
-        self.p_corpus = np.zeros(len(vocab))    # log P(t|C)
+        self.p_corpus = np.zeros(len(self.vocab))    # log P(t|C)
         for i, f in cf.iteritems():
             self.p_corpus[i] = np.log(f) - c_size
 
@@ -56,8 +57,8 @@ class WeighWords(object):
             Number of iterations to run. Defaults to 50.
         '''
 
-        tf, p_term = self.document_model(d)
-        p_term = self.EM(tf, p_term, n_iter)
+        tf, p_term = self._document_model(d)
+        p_term = self._EM(tf, p_term, n_iter)
 
         return nlargest(k, self.vocab.iterkeys(), lambda t: p_term[t])
 
@@ -83,7 +84,7 @@ class WeighWords(object):
 
         logger.info('Gathering term probabilities')
 
-        tf = np.zeros(len(vocab))   # Term frequency
+        tf = np.zeros(len(self.vocab))   # Term frequency
         p_term = np.empty(tf.shape[0])
         p_term.fill(-np.inf)        # lg 0
 
@@ -123,8 +124,8 @@ class WeighWords(object):
         if n_iter is None:
             n_iter = 50
 
-        w_ = np.log(1 - w)
-        w = np.log(w)
+        w_ = np.log(1 - self.w)
+        w = np.log(self.w)
 
         p_corpus = self.p_corpus + w_
         tf = np.log(tf)
