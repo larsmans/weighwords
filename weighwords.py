@@ -33,7 +33,7 @@ class WeighWords(object):
         logger.info('Building corpus model')
 
         self.w = w
-	self.vocab = {}              # Vocabulary: maps terms to numeric indices
+        self.vocab = {}              # Vocabulary: maps terms to numeric indices
         cf = defaultdict(int)   # Corpus frequency
 
         for d in documents:
