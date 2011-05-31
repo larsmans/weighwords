@@ -37,14 +37,14 @@ class WeighWords(object):
 
         for d in documents:
             for tok in d:
-                i = vocab.setdefault(tok, len(vocab))
+                i = self.vocab.setdefault(tok, len(self.vocab))
                 cf[i] += 1
 
         c_size = np.log(sum(cf.itervalues()))
 
         self.p_corpus = np.zeros(len(vocab))    # log P(t|C)
         for i, f in cf.iteritems():
-            p_corpus[i] = np.log(f) - c_size
+            self.p_corpus[i] = np.log(f) - c_size
 
 
     def top(self, k, d, n_iter=None):
