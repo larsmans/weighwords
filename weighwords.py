@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class WeighWords(object):
-    def __init__(self, documents, w):
+    def __init__(self, documents, w, thresh=0):
         '''Build corpus (background) model.
 
         Parameters
@@ -21,6 +21,8 @@ class WeighWords(object):
         documents : array of arrays of terms
         w : float
             Weight of document model (1 - weight of corpus model)
+        thresh : int
+            Don't include words that occur < thresh times
 
         Returns
         -------
@@ -32,8 +34,9 @@ class WeighWords(object):
 
         logger.info('Building corpus model')
 
+        self.thresh = thresh
         self.w = w
-        self.vocab = {}              # Vocabulary: maps terms to numeric indices
+        self.vocab = {}         # Vocabulary: maps terms to numeric indices
         cf = defaultdict(int)   # Corpus frequency
 
         for d in documents:
@@ -88,13 +91,15 @@ class WeighWords(object):
         p_term = np.empty(tf.shape[0])
         p_term.fill(-np.inf)        # lg 0
 
-        n_distinct = 0
         for tok in d:
             i = self.vocab[tok]
             if tf[i] == 0:
                 p_term[i] = 0.      # lg 1
-                n_distinct += 1
             tf[i] += 1.
+
+        rare = (tf < self.thresh)
+        tf -= rare * tf
+        n_distinct = (tf > 0).sum()
 
         p_term -= np.log(n_distinct)
 
