@@ -34,21 +34,25 @@ class WeighWords(object):
 
         logger.info('Building corpus model')
 
-        self.thresh = thresh
         self.w = w
-        self.vocab = vocab = {} # Vocabulary: maps terms to numeric indices
-        cf = defaultdict(int)   # Corpus frequency
+        self.vocab = vocab = {}     # Vocabulary: maps terms to numeric indices
+        count = defaultdict(int)    # Corpus frequency
 
         for d in documents:
             for tok in d:
                 i = vocab.setdefault(tok, len(vocab))
-                cf[i] += 1
+                count[i] += 1
 
-        c_size = np.log(sum(cf.itervalues()))
+        c_size = np.log(sum(count.itervalues()))
 
-        self.p_corpus = np.zeros(len(self.vocab))    # log P(t|C)
-        for i, f in cf.iteritems():
-            self.p_corpus[i] = np.log(f) - c_size
+        cf = np.empty(len(count))
+        for i, f in count.iteritems():
+            cf[i] = f
+        rare = (cf < thresh)
+        cf -= rare * cf
+
+        # lg P(t|C)
+        self.p_corpus = np.log(cf) - np.log(np.sum(cf))
 
 
     def top(self, k, d, n_iter=None, w=None):
@@ -94,8 +98,6 @@ class WeighWords(object):
         for tok in d:
             tf[self.vocab[tok]] += 1
 
-        rare = (tf < self.thresh)
-        tf -= rare * tf
         n_distinct = (tf > 0).sum()
 
         p_term = np.log(tf > 0) - np.log(n_distinct)
