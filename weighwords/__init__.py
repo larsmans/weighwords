@@ -79,7 +79,7 @@ class Parsimonious(object):
         p_term = self._EM(tf, p_term, w, max_iter, eps)
 
         terms = [(t, p_term[i]) for t, i in self.vocab.iteritems()]
-        return nlargest(k, terms, lambda ti: p_term[ti[1]])
+        return nlargest(k, terms, lambda tp: tp[1])
 
 
     def _document_model(self, d):
