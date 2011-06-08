@@ -139,8 +139,6 @@ class Parsimonious(object):
         w_ = np.log(1 - w)
         w = np.log(w)
 
-        eps = np.log(eps)
-
         p_corpus = self.p_corpus + w_
         tf = np.log(tf)
 
