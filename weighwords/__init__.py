@@ -55,7 +55,7 @@ class Parsimonious(object):
         self.p_corpus = np.log(cf) - np.log(np.sum(cf))
 
 
-    def top(self, k, d, max_iter=50, eps=1e-5 w=None):
+    def top(self, k, d, max_iter=50, eps=1e-5, w=None):
         '''Get the top k terms of a document d and their log probabilities.
 
         Uses the Expectation Maximization (EM) algorithm to estimate term
