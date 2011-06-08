@@ -12,7 +12,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-class WeighWords(object):
+class Parsimonious(object):
     def __init__(self, documents, w, thresh=0):
         '''Build corpus (background) model.
 
@@ -56,7 +56,7 @@ class WeighWords(object):
 
 
     def top(self, k, d, max_iter=50, eps=1e-5 w=None):
-        '''Get the top k terms of a document d.
+        '''Get the top k terms of a document d and their log probabilities.
 
         Uses the Expectation Maximization (EM) algorithm to estimate term
         probabilities.
@@ -69,13 +69,17 @@ class WeighWords(object):
             Convergence threshold for EM algorithm.
         w : float, optional
             Weight of document model; overrides value given to __init__
+
+        Returns
+        -------
+        t_p : list of (str, float)
         '''
 
         tf, p_term = self._document_model(d)
         p_term = self._EM(tf, p_term, w, max_iter, eps)
 
-        return nlargest(k, self.vocab.iterkeys(),
-                        lambda t: p_term[self.vocab[t]])
+        terms = [(t, p_term[i]) for t, i in self.vocab.iteritems()]
+        return nlargest(k, terms, lambda ti: p_term[ti[1]])
 
 
     def _document_model(self, d):
