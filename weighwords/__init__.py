@@ -55,19 +55,24 @@ class WeighWords(object):
         self.p_corpus = np.log(cf) - np.log(np.sum(cf))
 
 
-    def top(self, k, d, n_iter=None, w=None):
+    def top(self, k, d, max_iter=50, eps=1e-5 w=None):
         '''Get the top k terms of a document d.
+
+        Uses the Expectation Maximization (EM) algorithm to estimate term
+        probabilities.
 
         Parameters
         ----------
-        n_iter : int
-            Number of iterations to run. Defaults to 50.
-        w : float
+        max_iter : int, optional
+            Maximum number of iterations of EM algorithm to run.
+        eps : float, optional
+            Convergence threshold for EM algorithm.
+        w : float, optional
             Weight of document model; overrides value given to __init__
         '''
 
         tf, p_term = self._document_model(d)
-        p_term = self._EM(tf, p_term, w, n_iter)
+        p_term = self._EM(tf, p_term, w, max_iter, eps)
 
         return nlargest(k, self.vocab.iterkeys(),
                         lambda t: p_term[self.vocab[t]])
@@ -105,7 +110,7 @@ class WeighWords(object):
         return tf, p_term
 
 
-    def _EM(self, tf, p_term, w, n_iter=None):
+    def _EM(self, tf, p_term, w, max_iter, eps):
         '''Expectation maximization.
 
         Parameters
@@ -114,8 +119,8 @@ class WeighWords(object):
             Term frequencies, as returned by document_model
         p_term : array of float
             Term probabilities, as returned by document_model
-        n_iter : int
-            Number of iterations to run. Defaults to 50.
+        max_iter : int
+            Number of iterations to run.
 
         Returns
         -------
@@ -123,15 +128,14 @@ class WeighWords(object):
             A posteriori term probabilities.
         '''
 
-        logger.info('EM')
-
-        if n_iter is None:
-            n_iter = 50
+        logger.info('EM with max_iter=%d, eps=%g' % (max_iter, eps))
 
         if w is None:
             w = self.w
         w_ = np.log(1 - w)
         w = np.log(w)
+
+        eps = np.log(eps)
 
         p_corpus = self.p_corpus + w_
         tf = np.log(tf)
@@ -139,12 +143,18 @@ class WeighWords(object):
         E = np.empty(tf.shape[0])
 
         p_term = np.array(p_term)
-        for i in xrange(n_iter):
+        for i in xrange(1, max_iter + 1):
             # E-step
             p_term += w
             E = tf + p_term - np.logaddexp(p_corpus, p_term)
 
             # M-step
-            p_term = E - np.logaddexp.reduce(E)
+            new_p_term = E - np.logaddexp.reduce(E)
+
+            diff = new_p_term - p_term
+            p_term = new_p_term
+            if (diff < eps).all():
+                logger.info('EM: convergence reached after %d iterations' % i)
+                break
 
         return p_term
