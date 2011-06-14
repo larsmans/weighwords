@@ -6,9 +6,10 @@ setup(
     author = 'Lars Buitinck',
     author_email = 'L.J.Buitinck@uva.nl',
     description = 'Python library for creating word weights/word clouds from text',
-    keywords = 'word cloud nlp',
+    keywords = 'word cloud nlp language model',
     packages = ['weighwords'],
-    classifiers=[
+    install_requires = ['numpy>=1.4.0'],
+    classifiers = [
         'Development Status :: 3 - Alpha',
     ]
 )

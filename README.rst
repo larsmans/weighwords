@@ -1,5 +1,9 @@
 **WeighWords** is a Python library for creating word weights from text. It can
-be used to create word clouds (although it doesn't currently do visualisation).
+be used to create word clouds.
+
+WeighWords does not do visualization of word clouds. For that, you can paste
+its output into http://wordle.net, the `IBM Word-Cloud Generator
+<http://www.alphaworks.ibm.com/tech/wordcloud>`_.
 
 Rather than use simple word frequency, it weighs words by statistical models
 known as *parsimonious language models*. These models are good at picking up
