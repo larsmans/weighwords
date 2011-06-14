@@ -12,7 +12,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-class Parsimonious(object):
+class ParsimoniousLM(object):
     def __init__(self, documents, w, thresh=0):
         '''Build corpus (background) model.
 
