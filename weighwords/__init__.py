@@ -24,8 +24,8 @@ class ParsimoniousLM(object):
         thresh : int
             Don't include words that occur < thresh times
 
-        Returns
-        -------
+        Attributes
+        ----------
         vocab : dict of term -> int
             Mapping of terms to numeric indices
         p_corpus : array of float
