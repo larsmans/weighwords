@@ -43,17 +43,19 @@ class ParsimoniousLM(object):
                 i = vocab.setdefault(tok, len(vocab))
                 count[i] += 1
 
-        c_size = np.log(sum(count.itervalues()))
-
         cf = np.empty(len(count))
         for i, f in count.iteritems():
             cf[i] = f
         rare = (cf < thresh)
         cf -= rare * cf
 
-        # lg P(t|C)
-        self.p_corpus = np.log(cf) - np.log(np.sum(cf))
+        try:
+            old_error_settings = np.seterr(divide='ignore')
 
+            # lg P(t|C)
+            self.p_corpus = np.log(cf) - np.log(np.sum(cf))
+        finally:
+            np.seterr(**old_error_settings)
 
     def top(self, k, d, max_iter=50, eps=1e-5, w=None):
         '''Get the top k terms of a document d and their log probabilities.
@@ -80,7 +82,6 @@ class ParsimoniousLM(object):
 
         terms = [(t, p_term[i]) for t, i in self.vocab.iteritems()]
         return nlargest(k, terms, lambda tp: tp[1])
-
 
     def _document_model(self, d):
         '''Build document model.
@@ -109,10 +110,13 @@ class ParsimoniousLM(object):
 
         n_distinct = (tf > 0).sum()
 
-        p_term = np.log(tf > 0) - np.log(n_distinct)
+        try:
+            old_error_settings = np.seterr(divide='ignore')
+            p_term = np.log(tf > 0) - np.log(n_distinct)
+        finally:
+            np.seterr(**old_error_settings)
 
         return tf, p_term
-
 
     def _EM(self, tf, p_term, w, max_iter, eps):
         '''Expectation maximization.
@@ -144,19 +148,24 @@ class ParsimoniousLM(object):
 
         E = np.empty(tf.shape[0])
 
-        p_term = np.array(p_term)
-        for i in xrange(1, max_iter + 1):
-            # E-step
-            p_term += w
-            E = tf + p_term - np.logaddexp(p_corpus, p_term)
+        try:
+            old_error_settings = np.seterr(divide='ignore')
+            p_term = np.array(p_term)
+            for i in xrange(1, max_iter + 1):
+                # E-step
+                p_term += w
+                E = tf + p_term - np.logaddexp(p_corpus, p_term)
 
-            # M-step
-            new_p_term = E - np.logaddexp.reduce(E)
+                # M-step
+                new_p_term = E - np.logaddexp.reduce(E)
 
-            diff = new_p_term - p_term
-            p_term = new_p_term
-            if (diff < eps).all():
-                logger.info('EM: convergence reached after %d iterations' % i)
-                break
+                diff = new_p_term - p_term
+                p_term = new_p_term
+                if (diff < eps).all():
+                    logger.info('EM: convergence reached after %d iterations'
+                                % i)
+                    break
+        finally:
+            np.seterr(**old_error_settings)
 
         return p_term
