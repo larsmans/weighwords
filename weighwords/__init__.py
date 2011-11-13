@@ -8,6 +8,8 @@ from heapq import nlargest
 import logging
 import numpy as np
 
+from .logsum import logsum
+
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +157,7 @@ class ParsimoniousLM(object):
                 E = tf + p_term - np.logaddexp(p_corpus, p_term)
 
                 # M-step
-                new_p_term = E - np.logaddexp.reduce(E)
+                new_p_term = E - logsum(E)
 
                 diff = new_p_term - p_term
                 p_term = new_p_term
