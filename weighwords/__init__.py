@@ -43,7 +43,7 @@ class ParsimoniousLM(object):
                 i = vocab.setdefault(tok, len(vocab))
                 count[i] += 1
 
-        cf = np.empty(len(count))
+        cf = np.empty(len(count), dtype=np.float)
         for i, f in count.iteritems():
             cf[i] = f
         rare = (cf < thresh)
@@ -103,7 +103,7 @@ class ParsimoniousLM(object):
 
         logger.info('Gathering term probabilities')
 
-        tf = np.zeros(len(self.vocab))   # Term frequency
+        tf = np.zeros(len(self.vocab), dtype=np.float)  # Term frequency
 
         for tok in d:
             tf[self.vocab[tok]] += 1
@@ -146,11 +146,9 @@ class ParsimoniousLM(object):
         p_corpus = self.p_corpus + w_
         tf = np.log(tf)
 
-        E = np.empty(tf.shape[0])
-
         try:
             old_error_settings = np.seterr(divide='ignore')
-            p_term = np.array(p_term)
+            p_term = np.asarray(p_term)
             for i in xrange(1, max_iter + 1):
                 # E-step
                 p_term += w
