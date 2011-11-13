@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name = "weighwords",
-    version = "0.1",
+    version = "0.2",
     author = "Lars Buitinck",
     author_email = "L.J.Buitinck@uva.nl",
     description = "Python library for creating word weights/word clouds from text",
