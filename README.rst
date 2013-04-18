@@ -12,6 +12,18 @@ collection. The downside to this is that you can't use WeighWords to make a
 word cloud of a single document; you need a bunch of document to compare to.
 
 
+Installation
+------------
+
+Either::
+
+    pip install weighwords
+
+or::
+
+    python setup.py install
+
+
 References
 ----------
 D. Hiemstra, S. Robertson and H. Zaragoza (2004). `Parsimonious Language Models
