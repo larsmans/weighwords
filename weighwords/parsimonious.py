@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2011 University of Amsterdam
+# Copyright 2011-2013 University of Amsterdam
 # Author: Lars Buitinck
 
 from collections import defaultdict
@@ -15,25 +15,29 @@ logger = logging.getLogger(__name__)
 
 
 class ParsimoniousLM(object):
+    """Language model for a set of documents.
+
+    Constructing an object of this class fits a background model. The top
+    method can then be used to fit document-specific models, also for unseen
+    documents (with the same vocabulary as the background corpus).
+
+    Parameters
+    ----------
+    documents : iterable over iterable over terms
+    w : float
+        Weight of document model (1 - weight of corpus model)
+    thresh : int
+        Don't include words that occur < thresh times
+
+    Attributes
+    ----------
+    vocab : dict of term -> int
+        Mapping of terms to numeric indices
+    p_corpus : array of float
+        Log prob of terms
+    """
+
     def __init__(self, documents, w, thresh=0):
-        '''Build corpus (background) model.
-
-        Parameters
-        ----------
-        documents : array of arrays of terms
-        w : float
-            Weight of document model (1 - weight of corpus model)
-        thresh : int
-            Don't include words that occur < thresh times
-
-        Attributes
-        ----------
-        vocab : dict of term -> int
-            Mapping of terms to numeric indices
-        p_corpus : array of float
-            Log prob of terms
-        '''
-
         logger.info('Building corpus model')
 
         self.w = w
